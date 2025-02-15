@@ -50,6 +50,14 @@ class TaskType(Enum):
     EXTRACT_CARD = "A8"
     SIMILAR_COMMENTS = "A9"
     TICKET_SALES = "A10"
+    FETCH_DATA = "B1"
+    CLONE_GIT_REPO = "B2"
+    RUN_SQL_QUERY = "B3"
+    SCRAPE_WEBSITE = "B4"
+    COMPRESS_RESIZE_IMAGE = "B5"
+    TRANSCRIBE_AUDIO = "B6"
+    CONVERT_MARKDOWN = "B7"
+    FILTER_CSV = "B8"
 
 async def call_llm(prompt: str) -> str:
     """Call the LLM (GPT-4-mini) via AI Proxy"""
@@ -74,7 +82,7 @@ async def call_llm(prompt: str) -> str:
 async def parse_task(task_description: str) -> TaskType:
     """Use LLM to categorize the task into one of the predefined types"""
     prompt = f"""Given this task description: "{task_description}"
-Categorize it into one of these types:
+"""Categorize it into one of these types:
 A1: Install uv and run datagen.py
 A2: Format markdown file
 A3: Count Wednesdays in dates
@@ -158,27 +166,6 @@ async def read_file(path: str):
         raise HTTPException(status_code=404)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-async def execute_task(task_type: TaskType, original_task: str) -> dict:
-    """Execute the identified task"""
-    handlers = {
-        TaskType.INSTALL_AND_RUN: handle_install_and_run,
-        TaskType.FORMAT_MARKDOWN: handle_format_markdown,
-        TaskType.COUNT_WEDNESDAYS: handle_count_wednesdays,
-        TaskType.SORT_CONTACTS: handle_sort_contacts,
-        TaskType.RECENT_LOGS: handle_recent_logs,
-        TaskType.CREATE_INDEX: handle_create_index,
-        TaskType.EXTRACT_EMAIL: handle_extract_email,
-        TaskType.EXTRACT_CARD: handle_extract_card,
-        TaskType.SIMILAR_COMMENTS: handle_similar_comments,
-        TaskType.TICKET_SALES: handle_ticket_sales
-    }
-    
-    handler = handlers.get(task_type)
-    if not handler:
-        raise ValueError(f"Unknown task type: {task_type}")
-    
-    return await handler(original_task)
 
 if __name__ == "__main__":
     import uvicorn
@@ -437,18 +424,6 @@ async def handle_ticket_sales(task: str) -> dict:
 # The handler for the tasks in the FastAPI app
 
 # Task Types Enum for B1 to B10
-class TaskType(Enum):
-    FETCH_DATA = "B1"
-    CLONE_GIT_REPO = "B2"
-    RUN_SQL_QUERY = "B3"
-    SCRAPE_WEBSITE = "B4"
-    COMPRESS_RESIZE_IMAGE = "B5"
-    TRANSCRIBE_AUDIO = "B6"
-    CONVERT_MARKDOWN = "B7"
-    FILTER_CSV = "B8"
-    COUNT_WEDNESDAYS = "B9"
-    SORT_CONTACTS = "B10"
-
 
 async def handle_fetch_data(task: str) -> dict:
     """B1: Fetch data from an API and save it"""
@@ -627,7 +602,18 @@ async def handle_filter_csv(task: str) -> dict:
 
 
 async def execute_task(task_type: TaskType, original_task: str) -> dict:
+    """Execute the identified task"""
     handlers = {
+        TaskType.INSTALL_AND_RUN: handle_install_and_run,
+        TaskType.FORMAT_MARKDOWN: handle_format_markdown,
+        TaskType.COUNT_WEDNESDAYS: handle_count_wednesdays,
+        TaskType.SORT_CONTACTS: handle_sort_contacts,
+        TaskType.RECENT_LOGS: handle_recent_logs,
+        TaskType.CREATE_INDEX: handle_create_index,
+        TaskType.EXTRACT_EMAIL: handle_extract_email,
+        TaskType.EXTRACT_CARD: handle_extract_card,
+        TaskType.SIMILAR_COMMENTS: handle_similar_comments,
+        TaskType.TICKET_SALES: handle_ticket_sales,
         TaskType.FETCH_DATA: handle_fetch_data,
         TaskType.CLONE_GIT_REPO: handle_clone_git_repo,
         TaskType.RUN_SQL_QUERY: handle_run_sql_query,
@@ -637,7 +623,9 @@ async def execute_task(task_type: TaskType, original_task: str) -> dict:
         TaskType.CONVERT_MARKDOWN: handle_convert_markdown_to_html,
         TaskType.FILTER_CSV: handle_filter_csv,
     }
+    
     handler = handlers.get(task_type)
     if not handler:
         raise ValueError(f"Unknown task type: {task_type}")
+    
     return await handler(original_task)
