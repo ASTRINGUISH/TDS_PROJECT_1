@@ -101,8 +101,6 @@ B5: Compress or resize an image
 B6: Transcribe audio from MP3 to text
 B7: Convert Markdown to HTML
 B8: Filter a CSV file
-B9: Count Wednesdays in dates
-B10: Sort contacts
 
 Return only the task type (e.g., "A1")."""
     
